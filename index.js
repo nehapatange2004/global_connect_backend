@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors"
+import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes.js";
@@ -16,13 +17,13 @@ mongoose.connect(MONGO_DB_URI).then(
     console.log(err)
 })
 app.use(cors({
-    origin: 'http://localhost:5173' // Vite dev server URL
+    origin: 'http://localhost:5173', // Vite dev server URL
+    credentials: true
 
 }));
 app.use(express.json());
-
+app.use(cookieParser())
 app.use("/api/auth", authRoutes)
-
 // app.use("/api/users", usersRoutes)
 // app.use("/api/posts", postsRoutes)
 // app.use("/api/jobs", jobsRoutes)
@@ -30,4 +31,4 @@ app.use("/api/auth", authRoutes)
 
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`)
-})
+});
