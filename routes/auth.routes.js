@@ -3,6 +3,8 @@ import {
   LogInUser,
   logoutUser,
   registerUser,
+  resetPassword,
+  sendMail,
   
 } from "../controllers/auth.controller.js";
 import { protectedRoute } from "../middleware/auth.middleware.js";
@@ -25,5 +27,9 @@ authRoutes.get("/dash", protectedRoute, async (req, res) => {
 
 // To logout user i.e claer the token cookie
 authRoutes.get("/logout", logoutUser);
+
+
+authRoutes.post("/send-mail", sendMail)
+authRoutes.post("/reset-password", resetPassword)
 
 export default authRoutes;
