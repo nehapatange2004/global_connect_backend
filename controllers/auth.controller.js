@@ -2,11 +2,15 @@ import {
   comparePasswords,
   generateToken,
   hashPassword,
+  sendPasswordResetEmail,
 } from "../utils/auth.utils.js";
 import User from "../models/User.js";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken"
 import { error } from "../utils/error.utils.js";
 dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const LogInUser = async (req, res) => {
   try {
@@ -103,5 +107,45 @@ export const logoutUser = async (req, res) => {
   } catch (err) {
     console.log("Error while logging out: ", err);
     return res.status(500).send(error("Somthing went wrong", "Internal Server Error"));
+  }
+}
+
+export const sendMail = async (req, res) => {
+  try {
+    if (!req.body.email) {
+      return res.status(400).send(error("Email Id is required"))
+    }
+    sendPasswordResetEmail(req.body.email)
+    return res.status(200).send({message: "Email sent successfully"});
+  } catch (err) {
+    console.log(err);
+    return res.status(505).send(error(err, "Internal Server Error"));
+  }
+}
+
+export const resetPassword = async (req, res) => {
+  try {
+    if(!req.body.token || !req.body.newPassword) {
+      return res.status(400).send(error("No token or newPassword recieved"))
+    }
+    const decoded = jwt.verify(req.body.token, JWT_SECRET);
+    if (!decoded) {
+      return res.status(401).send({ messsage: "Authentication Failed!" });
+    }
+    const user = await User.findOne({email: decoded.email});
+
+    if(!user) {
+      console.log("User not found!")
+      return res.status(404).send({ messsage: `User with email ID ${decoded.email} not found` });
+    }
+    
+    user.password = await hashPassword(`${req.body.newPassword}`);
+
+    await user.save()
+    
+return res.status(200).send({message: "Password re-set is successful"});
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send(error("Password not changed", "Internal Server Error"))
   }
 }
