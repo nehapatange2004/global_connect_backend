@@ -135,6 +135,7 @@ export const resetPassword = async (req, res) => {
     const user = await User.findOne({email: decoded.email});
 
     if(!user) {
+      console.log("User not found!")
       return res.status(404).send({ messsage: `User with email ID ${decoded.email} not found` });
     }
     
