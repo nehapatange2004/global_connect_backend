@@ -139,15 +139,11 @@ export const resetPassword = async (req, res) => {
       return res.status(404).send({ messsage: `User with email ID ${decoded.email} not found` });
     }
     
-    user.password = hashPassword(`${req.body.newPassword}`);
+    user.password = await hashPassword(`${req.body.newPassword}`);
 
-    user.save().then(()=>{
-      return res.status(200).send({message: "Password re-set is successful"});
-    }).catch((err) => {
-      return res.status(304).send(error("Password not changed", "DB Error"));
-    });
+    await user.save()
     
-
+return res.status(200).send({message: "Password re-set is successful"});
   } catch (err) {
     console.log(err);
     return res.status(500).send(error("Password not changed", "Internal Server Error"))
