@@ -1,11 +1,13 @@
-import mongoose from 'mongoose';
-const { Schema } = mongoose;
+import mongoose from "mongoose";
 
-const postSchema = new Schema({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  content: { type: String, required: true },
-  likes: [{ type: Schema.Types.ObjectId, ref: 'User' }]
-}, { timestamps: true });
+const postSchema = new mongoose.Schema(
+  {
+    content: { type: String, required: true },
+    media: [{ type: String }], // Array of images/videos
+    postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  },
+  { timestamps: true }
+);
 
-const Post = mongoose.model('Post', postSchema);
+const Post = mongoose.model("Post", postSchema);
 export default Post;

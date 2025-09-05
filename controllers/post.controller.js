@@ -1,74 +1,72 @@
-import Post from '../models/Post.js';
-import User from '../models/User.js';
+import Post from "../models/Post.js";
 
-// CREATE a new post (Existing function)
+// Create a new post
 export const createPost = async (req, res) => {
   try {
-    const { content } = req.body;
-    const userId = req.user.id;
+    const mediaFiles = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
 
-    const newPost = new Post({ userId, content });
-    await newPost.save();
-    res.status(201).json(newPost);
+    const post = new Post({
+      content: req.body.content,
+      media: mediaFiles, // Array of image/video paths
+      postedBy: req.user.id,
+    });
+
+    await post.save();
+    res.status(201).json({ success: true, post });
   } catch (error) {
-    res.status(500).json({ message: 'Server error while creating post.' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// READ the user's feed (Existing function)
+// Get feed
 export const getFeed = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
-    const userAndConnectionsIds = [user._id, ...user.connections];
-
-    const feedPosts = await Post.find({ userId: { $in: userAndConnectionsIds } })
-      .populate('userId', 'name')
+    const posts = await Post.find()
+      .populate("postedBy", "username email")
       .sort({ createdAt: -1 });
-    res.status(200).json(feedPosts);
+
+    res.status(200).json({ success: true, posts });
   } catch (error) {
-    res.status(500).json({ message: 'Server error while fetching feed.' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// UPDATE a post (New function)
+// Update post
 export const updatePost = async (req, res) => {
   try {
-    const { content } = req.body;
     const post = await Post.findById(req.params.id);
 
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
+    if (!post) return res.status(404).json({ success: false, message: "Post not found" });
+    if (post.postedBy.toString() !== req.user.id)
+      return res.status(403).json({ success: false, message: "Unauthorized" });
+
+    // Update content
+    post.content = req.body.content || post.content;
+
+    // If new media is uploaded, replace old
+    if (req.files && req.files.length > 0) {
+      post.media = req.files.map(f => `/uploads/${f.filename}`);
     }
 
-    // Check if the user is the author of the post
-    if (post.userId.toString() !== req.user.id) {
-      return res.status(401).json({ message: "User not authorized" });
-    }
-
-    const updatedPost = await Post.findByIdAndUpdate(req.params.id, { content }, { new: true });
-    res.status(200).json(updatedPost);
+    await post.save();
+    res.status(200).json({ success: true, post });
   } catch (error) {
-    res.status(500).json({ message: 'Server error while updating post.' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// DELETE a post (New function)
+// Delete post
 export const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
 
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    }
+    if (!post) return res.status(404).json({ success: false, message: "Post not found" });
+    if (post.postedBy.toString() !== req.user.id)
+      return res.status(403).json({ success: false, message: "Unauthorized" });
 
-    // Check if the user is the author of the post
-    if (post.userId.toString() !== req.user.id) {
-      return res.status(401).json({ message: "User not authorized" });
-    }
-
-    await Post.findByIdAndDelete(req.params.id);
-    res.status(200).json({ message: "Post deleted successfully." });
+    await post.deleteOne();
+    res.status(200).json({ success: true, message: "Post deleted" });
   } catch (error) {
-    res.status(500).json({ message: 'Server error while deleting post.' });
+    res.status(500).json({ success: false, message: error.message });
   }
 };

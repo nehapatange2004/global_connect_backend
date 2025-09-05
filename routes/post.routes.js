@@ -1,15 +1,20 @@
-import express from 'express';
-import { createPost, getFeed, updatePost, deletePost } from '../controllers/post.controller.js';
-import { protectedRoute } from '../middleware/auth.middleware.js';
+import express from "express";
+import { createPost, getFeed, updatePost, deletePost } from "../controllers/post.controller.js";
+import { protectedRoute } from "../middleware/auth.middleware.js";
+import upload from "../middleware/upload.middleware.js";
 
 const postsRoutes = express.Router();
 
-// All post routes are protected and require a valid token
-postsRoutes.post('/', protectedRoute, createPost);
-postsRoutes.get('/feed', protectedRoute, getFeed);
+// Create a post with multiple files (max 5)
+postsRoutes.post("/", protectedRoute, upload.array("media", 5), createPost);
 
-// Add these new routes for updating and deleting
-postsRoutes.put('/:id', protectedRoute, updatePost);
-postsRoutes.delete('/:id', protectedRoute, deletePost);
+// Get feed
+postsRoutes.get("/feed", protectedRoute, getFeed);
+
+// Update post
+postsRoutes.put("/:id", protectedRoute, upload.array("media", 5), updatePost);
+
+// Delete post
+postsRoutes.delete("/:id", protectedRoute, deletePost);
 
 export default postsRoutes;
