@@ -1,43 +1,18 @@
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import User from "../models/User.js";
+import jwt from 'jsonwebtoken';
 
-import { error } from "../utils/error.utils.js";
-dotenv.config();
-const JWT_SECRET_KEY = process.env.JWT_SECRET;
-dotenv.config();
+export const authMiddleware = (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-// authentication check for protected routes.
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Authorization denied, no token provided.' });
+  }
 
-export const protectedRoute = async (req, res, next) => {
   try {
-    const token = req.cookies.token;
-    console.log(`token in cookies: ${token}`)
-    if (!token) {
-      console.log("No token!");
-      return res.status(401).send(error("Please log-in"));
-    }
-    
-    const decoded = jwt.verify(token, JWT_SECRET_KEY);
-    console.log(2);
-    
-    if (!decoded) {
-      return res.status(401).send({ messsage: "Authentication failed!" });
-    }
-    console.log("Token decoded");
-    const user = await User.findOne({ _id: decoded.userId }).select(
-      "-password"
-    );
-
-    if (!user) {
-      return res.status(401).send({ messsage: "User not found" });
-    }
-    req.user = user;
-    console.log("The req.user: ", user);
-
+    const token = authHeader.split(' ')[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = { id: decoded.id }; // Attach user id to the request object
     next();
-  } catch (err) {
-    console.log("error in verification!");
-    return res.status(505).send(error("Failed to authenticate user", "Internal Server Error"));
+  } catch (error) {
+    res.status(401).json({ message: 'Token is not valid.' });
   }
 };

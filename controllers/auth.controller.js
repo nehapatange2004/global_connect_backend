@@ -1,107 +1,46 @@
-import {
-  comparePasswords,
-  generateToken,
-  hashPassword,
-} from "../utils/auth.utils.js";
-import User from "../models/User.js";
-import dotenv from "dotenv";
-import { error } from "../utils/error.utils.js";
-dotenv.config();
+import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
-export const LogInUser = async (req, res) => {
+// **REGISTER LOGIC**
+export const register = async (req, res) => {
   try {
-    if (!req.body.email || !req.body.password) {
-      console.log("All fields are required")
-      return res.send(error("All fields marked * are required", "please fill all feilds"))
-    }
-    const user = await User.findOne({ email: req.body.email }).lean();
-
-    //match the password
-    if (!user) {
-      return res.status(401).send(error("User not found!"));
+    const { name, email, password } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User with this email already exists." });
     }
 
-    const isMatch = await comparePasswords(req.body.password, user.password);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    if (!isMatch) {
-      return res.status(401).send(error("Invalid Credentials!"));
-    }
-    delete user.password;
-    const token = generateToken(user._id, user.email)
-    user.token = token;
-    res.cookie("token", token, {
-      // expiresIn: "10s",
-      maxAge: 24 * 60 * 60 * 1000, // for one day i.e 24 hrs
-      httpOnly: true,
-
-    })
-    return res.send(user);
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send(error("Can't login right now", "Internal Server Error"))
-  }
-};
-
-export const registerUser = async (req, res) => {
-  try {
-    console.log(req.body.name);
-    console.log(req.body.email);
-    console.log(req.body.password);
-    if (!req.body.name || !req.body.email || !req.body.password) {
-      return res.send(error("All fields marked * are required"))
-    }
-
-    console.log(`Body: ${req.body}`)
-    const user = await User.findOne({ email: req.body.email });
-
-    if (user) {
-      console.log("User already exists: ", user);
-      return res
-        .status(403)
-        .send(error("Already have an account! Consider logging in!"));
-    }
-    const hashedPassword = await hashPassword(req.body.password);
-
-    const newUser = new User({
-      name: req.body.name,
-      email: req.body.email,
-      password: hashedPassword,
-
-    });
+    const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
-
-    const createdUser = await User.findOne({ email: req.body.email }).lean();
-
-    const token = generateToken(createdUser?._id, createdUser?.email);
-    delete createdUser.password;
-    createdUser.token = token;
-
-    res.cookie("token", token, {
-      // expiresIn: "10s",
-      maxAge: 24 * 60 * 60 * 1000, // for one day i.e 24 hrs
-      httpOnly: true,
-
-    })
-
-    console.log("Account Created successfully!");
-
-    return res.send(createdUser);
-  } catch (err) {
-    console.log("Error while getting data from mongo: ", err);
-    return res.status(500).send(error("Account not created", "Internal Server Error"));
+    // This is the correct response for registration
+    res.status(201).json({ message: "User registered successfully." });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error during registration.' });
   }
 };
 
-export const logoutUser = async (req, res) => {
+// **LOGIN LOGIC**
+export const login = async (req, res) => {
   try {
-    res.clearCookie("token", {
-      maxAge: 24 * 60 * 60 * 1000, // for one day i.e 24 hrs
-      httpOnly: true,
-    })
-    return res.status(200).send({ message: "Logged out successfully" });
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
 
-  } catch (err) {
-    console.log("Error while logging out: ", err);
-    return res.status(500).send(error("Somthing went wrong", "Internal Server Error"));
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials." });
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    // This is the correct response for login
+    res.status(200).json({ token, userId: user._id, name: user.name });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error during login.' });
   }
-}
+};

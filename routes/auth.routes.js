@@ -1,29 +1,9 @@
-import express from "express";
-import {
-  LogInUser,
-  logoutUser,
-  registerUser,
-  
-} from "../controllers/auth.controller.js";
-import { protectedRoute } from "../middleware/auth.middleware.js";
-import User from "../models/User.js";
+import express from 'express';
+import { register, login } from '../controllers/auth.controller.js';
 
-const authRoutes = express.Router();
+const router = express.Router();
 
-// logging in the user
-authRoutes.post("/login", LogInUser);
+router.post('/register', register);
+router.post('/login', login);
 
-// register new user
-authRoutes.post("/register", registerUser);
-
-
-//when page refreshes this will re-fetch the user details.
-authRoutes.get("/dash", protectedRoute, async (req, res) => {
-  console.log("User is Authenticated")
-  res.status(200).send(req.user);
-});
-
-// To logout user i.e claer the token cookie
-authRoutes.get("/logout", logoutUser);
-
-export default authRoutes;
+export default router;

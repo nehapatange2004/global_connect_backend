@@ -1,34 +1,28 @@
-import express from "express";
-import cors from "cors"
-import cookieParser from "cookie-parser";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import authRoutes from "./routes/auth.routes.js";
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cors from 'cors';
+
+import authRoutes from './routes/auth.routes.js';
+import postRoutes from './routes/post.routes.js';
+
 dotenv.config();
 
 const app = express();
 
-const PORT = process.env.PORT || 5000;
-const MONGO_DB_URI = process.env.MONGO_DB_URI;
-
-mongoose.connect(MONGO_DB_URI).then(
-    console.log(`\nMongoDB connected successfully 🌱\n`)
-).catch((err) => {
-    console.log(err)
-})
-app.use(cors({
-    origin: 'http://localhost:5173', // Vite dev server URL
-    credentials: true
-
-}));
+// Middleware
+app.use(cors());
 app.use(express.json());
-app.use(cookieParser())
-app.use("/api/auth", authRoutes)
-// app.use("/api/users", usersRoutes)
-// app.use("/api/posts", postsRoutes)
-// app.use("/api/jobs", jobsRoutes)
-// app.use("/api/messages", messagesRoutes);
 
-app.listen(PORT, () => {
-    console.log(`App listening on port ${PORT}`)
-});
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/posts', postRoutes);
+
+// Connect to MongoDB and start server
+const PORT = process.env.PORT || 5000;
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    app.listen(PORT, () => console.log(`Server running on port: ${PORT}`));
+    console.log("MongoDB connected successfully");
+  })
+  .catch((error) => console.log(`Error connecting to MongoDB: ${error}`));
