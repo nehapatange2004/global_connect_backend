@@ -41,6 +41,8 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/jobs", jobsRoutes);
+// app.use("/api/users", usersRoutes);
+// app.use("/api/messages", messagesRoutes);
 
 // ✅ Serve uploaded files (images/videos)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
