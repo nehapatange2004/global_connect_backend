@@ -8,7 +8,8 @@ import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/auth.routes.js";
 import postsRoutes from "./routes/post.routes.js";
-import jobsRoutes from "./routes/job.routes.js"; // ✅ added
+import jobsRoutes from "./routes/job.routes.js";
+import connectionRoutes from "./routes/connection.routes.js"; // ✅ added
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/jobs", jobsRoutes);
+app.use("/api/connections", connectionRoutes); // ✅ added
 // app.use("/api/users", usersRoutes);
 // app.use("/api/messages", messagesRoutes);
 
