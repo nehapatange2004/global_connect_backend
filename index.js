@@ -9,7 +9,8 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.routes.js";
 import postsRoutes from "./routes/post.routes.js";
 import jobsRoutes from "./routes/job.routes.js";
-import connectionRoutes from "./routes/connection.routes.js"; // ✅ added
+import connectionRoutes from "./routes/connection.routes.js";
+import notificationRoutes from "./routes/notification.routes.js"; // ✅ added
 
 dotenv.config();
 
@@ -18,11 +19,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_DB_URI = process.env.MONGO_DB_URI;
 
-// ✅ Proper MongoDB connection with correct logging
+// ✅ MongoDB connection
 mongoose
   .connect(MONGO_DB_URI)
-  .then(() => console.log("\nMongoDB connected successfully 🌱\n"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .then(() => console.log("\n✅ MongoDB connected successfully 🌱\n"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
 // ✅ Needed for __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -31,7 +32,7 @@ const __dirname = path.dirname(__filename);
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173", // Vite dev server URL
+    origin: "http://localhost:5173", // adjust for frontend
     credentials: true,
   })
 );
@@ -42,13 +43,12 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/jobs", jobsRoutes);
-app.use("/api/connections", connectionRoutes); // ✅ added
-// app.use("/api/users", usersRoutes);
-// app.use("/api/messages", messagesRoutes);
+app.use("/api/connections", connectionRoutes);
+app.use("/api/notifications", notificationRoutes); // ✅ added
 
-// ✅ Serve uploaded files (images/videos)
+// Static files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
+  console.log(`🚀 App listening on port ${PORT}`);
 });
