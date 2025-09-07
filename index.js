@@ -9,7 +9,7 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/auth.routes.js";
 import postsRoutes from "./routes/post.routes.js";
 import jobsRoutes from "./routes/job.routes.js"; // ✅ added
-
+import usersRoutes from "./routes/user.routes.js";
 dotenv.config();
 
 const app = express();
@@ -34,14 +34,15 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({ limit: "5mb", extended: true }));
 app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/jobs", jobsRoutes);
-// app.use("/api/users", usersRoutes);
+app.use("/api/users", usersRoutes);
 // app.use("/api/messages", messagesRoutes);
 
 // ✅ Serve uploaded files (images/videos)
