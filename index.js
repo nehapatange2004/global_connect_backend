@@ -8,14 +8,9 @@ import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/auth.routes.js";
 import postsRoutes from "./routes/post.routes.js";
-<<<<<<< HEAD
 import jobsRoutes from "./routes/job.routes.js"; // ✅ added
 import usersRoutes from "./routes/user.routes.js";
-=======
-import jobsRoutes from "./routes/job.routes.js";
 import connectionRoutes from "./routes/connection.routes.js"; // ✅ added
-
->>>>>>> connection-feature
 dotenv.config();
 
 const app = express();
@@ -48,12 +43,9 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/jobs", jobsRoutes);
-<<<<<<< HEAD
 app.use("/api/users", usersRoutes);
-=======
 app.use("/api/connections", connectionRoutes); // ✅ added
 // app.use("/api/users", usersRoutes);
->>>>>>> connection-feature
 // app.use("/api/messages", messagesRoutes);
 
 // ✅ Serve uploaded files (images/videos)
