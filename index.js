@@ -5,15 +5,16 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-
 import authRoutes from "./routes/auth.routes.js";
 import postsRoutes from "./routes/post.routes.js";
 import jobsRoutes from "./routes/job.routes.js"; // ✅ added
 import usersRoutes from "./routes/user.routes.js";
 import connectionRoutes from "./routes/connection.routes.js"; // ✅ added
+import { app, io, server } from "./utils/socket.js";
+import messagesRoutes from "./routes/message.route.js";
 dotenv.config();
 
-const app = express();
+
 
 const PORT = process.env.PORT || 5000;
 const MONGO_DB_URI = process.env.MONGO_DB_URI;
@@ -46,11 +47,12 @@ app.use("/api/jobs", jobsRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/connections", connectionRoutes); // ✅ added
 // app.use("/api/users", usersRoutes);
-// app.use("/api/messages", messagesRoutes);
+app.use("/api/messages", messagesRoutes);
 
 // ✅ Serve uploaded files (images/videos)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log("listening!");
 });
