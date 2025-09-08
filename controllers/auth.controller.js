@@ -82,9 +82,9 @@ export const registerUser = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
-      secure: false,        // must be false on localhost (HTTP)
-      sameSite: "lax"       // 'lax' works for local dev cross-origin
+      secure: true,       // required for SameSite=None
+      sameSite: "none",   // cross-site cookie
+      maxAge: 24 * 60 * 60 * 1000
     });
 
 
