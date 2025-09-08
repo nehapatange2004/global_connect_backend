@@ -81,11 +81,12 @@ export const registerUser = async (req, res) => {
     createdUser.token = token;
 
     res.cookie("token", token, {
-      // expiresIn: "10s",
-      maxAge: 24 * 60 * 60 * 1000, // for one day i.e 24 hrs
-      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      httpOnly: true,              // JS can't access, good for security
+      secure: true,                // must be true for HTTPS (Render uses HTTPS)
+      sameSite: "none"             // allows cross-site cookies
+    });
 
-    })
 
     console.log("Account Created successfully!");
 
@@ -116,7 +117,7 @@ export const sendMail = async (req, res) => {
       return res.status(400).send(error("Email Id is required"))
     }
     sendPasswordResetEmail(req.body.email)
-    return res.status(200).send({message: "Email sent successfully"});
+    return res.status(200).send({ message: "Email sent successfully" });
   } catch (err) {
     console.log(err);
     return res.status(505).send(error(err, "Internal Server Error"));
@@ -125,25 +126,25 @@ export const sendMail = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
   try {
-    if(!req.body.token || !req.body.newPassword) {
+    if (!req.body.token || !req.body.newPassword) {
       return res.status(400).send(error("No token or newPassword recieved"))
     }
     const decoded = jwt.verify(req.body.token, JWT_SECRET);
     if (!decoded) {
       return res.status(401).send({ messsage: "Authentication Failed!" });
     }
-    const user = await User.findOne({email: decoded.email});
+    const user = await User.findOne({ email: decoded.email });
 
-    if(!user) {
+    if (!user) {
       console.log("User not found!")
       return res.status(404).send({ messsage: `User with email ID ${decoded.email} not found` });
     }
-    
+
     user.password = await hashPassword(`${req.body.newPassword}`);
 
     await user.save()
-    
-return res.status(200).send({message: "Password re-set is successful"});
+
+    return res.status(200).send({ message: "Password re-set is successful" });
   } catch (err) {
     console.log(err);
     return res.status(500).send(error("Password not changed", "Internal Server Error"))
