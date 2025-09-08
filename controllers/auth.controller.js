@@ -84,7 +84,7 @@ export const registerUser = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000, // 1 day
       httpOnly: true,              // JS can't access, good for security
       secure: false,                // must be true for HTTPS (Render uses HTTPS)
-      sameSite: "none"             // allows cross-site cookies
+      sameSite: "lax"             // allows cross-site cookies (lax for localhost dev cross )
     });
 
 
