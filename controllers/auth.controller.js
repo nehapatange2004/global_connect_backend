@@ -81,10 +81,10 @@ export const registerUser = async (req, res) => {
     createdUser.token = token;
 
     res.cookie("token", token, {
+      httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 1 day
-      httpOnly: true,              // JS can't access, good for security
-      secure: false,                // must be true for HTTPS (Render uses HTTPS)
-      sameSite: "lax"             // allows cross-site cookies (lax for localhost dev cross )
+      secure: false,        // must be false on localhost (HTTP)
+      sameSite: "lax"       // 'lax' works for local dev cross-origin
     });
 
 
