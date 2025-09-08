@@ -82,9 +82,10 @@ export const registerUser = async (req, res) => {
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,       // required for SameSite=None
+      secure: false,       // required for SameSite=None
       sameSite: "none",   // cross-site cookie
-      maxAge: 24 * 60 * 60 * 1000
+      maxAge: 24 * 60 * 60 * 1000,
+      domain: "global-connect-backend-1.onrender.com",
     });
 
 
