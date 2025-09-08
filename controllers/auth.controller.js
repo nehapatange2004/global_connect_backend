@@ -85,7 +85,7 @@ export const registerUser = async (req, res) => {
       secure: false,       // required for SameSite=None
       sameSite: "none",   // cross-site cookie
       maxAge: 24 * 60 * 60 * 1000,
-      domain: "global-connect-backend-1.onrender.com",
+      domain: "http://localhost:5173",
     });
 
 
