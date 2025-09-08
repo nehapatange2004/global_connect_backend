@@ -55,26 +55,28 @@ export const sendMessage = async (req, res) => {
     const image = req.body.file;
     console.log("text: ", text);
     
+    const mediaFiles = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+    
 
-    let img_url = "";
+    // let img_url = "";
     // const filePath = req.file?.path;
-    if (image) {
-      const response = await cloudinary.uploader.upload(image, {
-        public_id: "MessageImg",
-        overwrite: true,
-        folder: "samples/test1",
-      });
+    // if (image) {
+    //   const response = await cloudinary.uploader.upload(image, {
+    //     public_id: "MessageImg",
+    //     overwrite: true,
+    //     folder: "samples/test1",
+    //   });
       // console.log("The cloudinary response: ", response);
-      img_url = response.secure_url;
+      // img_url = response.secure_url;
       // fs.unlinkSync(filePath);
-    }
+    // }
     const senderId = req.user._id;
     const receiverId = req.params.userId;
     const newMessage = new Message({
       senderId: senderId,
       receiverId: receiverId,
       text: text,
-      image: image ? img_url : null,
+      files: mediaFiles,
     });
     newMessage.save();
     const receiverSocketId = getReceiverSocketId(receiverId);
@@ -113,24 +115,42 @@ export const deleteMessage = async (req, res) => {
 
 export const editMessage = async (req, res) => {
   try {
-    const messageId = req.params.messageId
+    const messageId = req.params.messageId;
     const modifiedText = req.body.text;
-    const message = await Message.findOne({_id: messageId});
-    if(!message) {
-      console.log("No message found with id: ", messageId);
-      return res.status(404).send({message: "Message not found!"});
+
+    // Find existing message
+    const message = await Message.findById(messageId);
+    if (!message) {
+      console.log("No message found with id:", messageId);
+      return res.status(404).send({ message: "Message not found!" });
     }
-    await Message.updateOne({_id: messageId}, {$set: {
-      text: modifiedText
-    }})
-    const updatedMessage = await Message.findOne({_id: messageId});
+
+    // Handle uploaded media (if any)
+    const mediaFiles = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
+
+    // Build update object
+    const modifiedMessage = {};
+    if (modifiedText !== undefined) modifiedMessage.text = modifiedText;
+    if (mediaFiles.length > 0) modifiedMessage.files = mediaFiles;
+
+    // Update in DB
+    await Message.updateOne(
+      { _id: messageId },
+      { $set: modifiedMessage }
+    );
+
+    // Fetch updated message
+    const updatedMessage = await Message.findById(messageId);
+
+    // Notify receiver via socket
     const receiverSocketId = getReceiverSocketId(updatedMessage.receiverId);
-    if(receiverSocketId){
+    if (receiverSocketId) {
       io.to(receiverSocketId).emit("updatedMessage", updatedMessage);
     }
+
     res.status(200).send(updatedMessage);
   } catch (err) {
-    console.log("error in sending message: ", err);
+    console.log("Error in editing message:", err);
     return res.status(500).send({ message: "Internal Server Error" });
   }
 };
