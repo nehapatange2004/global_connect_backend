@@ -23,6 +23,13 @@ const userSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    role: {
+      type: String,
+      enum: ["recruiter", "user"], // restricts values
+      default: "user",
+      required: true
+
+    },
     profilePic: {
       type: String,
       default: "",
