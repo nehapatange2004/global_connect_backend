@@ -51,6 +51,7 @@ export const registerUser = async (req, res) => {
     console.log(req.body.name);
     console.log(req.body.email);
     console.log(req.body.password);
+    console.log(req.body.role);
     if (!req.body.name || !req.body.email || !req.body.password) {
       return res.send(error("All fields marked * are required"))
     }
@@ -65,12 +66,12 @@ export const registerUser = async (req, res) => {
         .send(error("Already have an account! Consider logging in!"));
     }
     const hashedPassword = await hashPassword(req.body.password);
-
+    const role = req.body.role ? req.body.role : 'user';
     const newUser = new User({
       name: req.body.name,
       email: req.body.email,
       password: hashedPassword,
-      role: req.body.role.toLowerCase()
+      role: role
 
     });
     await newUser.save();
