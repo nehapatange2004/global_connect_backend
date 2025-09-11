@@ -1,28 +1,30 @@
 import express from "express";
+import { protectedRoute } from "../middleware/auth.middleware.js";
 import {
   createJob,
   getAllJobs,
-  getJobById,
-  updateJob,
-  deleteJob,
+  applyForJob,
+  saveJob,
+  unsaveJob,
+  getMyApplications,
+  getSavedJobs,
 } from "../controllers/job.controller.js";
-import { protectedRoute } from "../middleware/auth.middleware.js";
 
 const jobsRoutes = express.Router();
 
-// Create job
+// Recruiter
 jobsRoutes.post("/", protectedRoute, createJob);
 
-// Get all jobs
+// Candidates
 jobsRoutes.get("/", protectedRoute, getAllJobs);
+jobsRoutes.post("/:id/apply", protectedRoute, applyForJob);
 
-// Get job by id
-jobsRoutes.get("/:id", protectedRoute, getJobById);
+// Saved jobs
+jobsRoutes.post("/:id/save", protectedRoute, saveJob);
+jobsRoutes.delete("/:id/unsave", protectedRoute, unsaveJob);
+jobsRoutes.get("/saved", protectedRoute, getSavedJobs);
 
-// Update job
-jobsRoutes.put("/:id", protectedRoute, updateJob);
-
-// Delete job
-jobsRoutes.delete("/:id", protectedRoute, deleteJob);
+// Applications
+jobsRoutes.get("/applications/me", protectedRoute, getMyApplications);
 
 export default jobsRoutes;
