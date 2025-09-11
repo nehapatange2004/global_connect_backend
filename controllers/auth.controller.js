@@ -87,7 +87,7 @@ export const registerUser = async (req, res) => {
       secure: false,       // required for SameSite=None
       sameSite: "none",   // cross-site cookie
       maxAge: 24 * 60 * 60 * 1000,
-      domain: "http://localhost:5173",
+      // domain: "http://localhost:5173",
     });
 
 
