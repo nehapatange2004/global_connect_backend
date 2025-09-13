@@ -32,7 +32,7 @@ const __dirname = path.dirname(__filename);
 // Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://gncipl-professional-networking-platform-frontend-h3ps27scl.vercel.app"], // Vite dev server URL
+    origin: ["http://localhost:5173", "https://gncipl-professional-networking-platform-frontend-g5aiosxzc.vercel.app"], // Vite dev server URL
     credentials: true,
   })
 );
