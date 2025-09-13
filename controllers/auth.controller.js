@@ -34,7 +34,7 @@ export const LogInUser = async (req, res) => {
     const token = generateToken(user._id, user.email)
     user.token = token;
     res.cookie("token", token, {
-      httpOnly: true,
+      
       secure: true,        // works with HTTPS
       sameSite: "none",    // needed for cross-site
       maxAge: 24 * 60 * 60 * 1000,
@@ -83,7 +83,7 @@ export const registerUser = async (req, res) => {
     delete createdUser.password;
     createdUser.token = token;
     res.cookie("token", token, {
-      httpOnly: true,
+      
       secure: true,        // works with HTTPS
       sameSite: "none",    // needed for cross-site
       maxAge: 24 * 60 * 60 * 1000,
