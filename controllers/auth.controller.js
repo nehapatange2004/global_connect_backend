@@ -33,13 +33,10 @@ export const LogInUser = async (req, res) => {
     delete user.password;
     const token = generateToken(user._id, user.email)
     user.token = token;
-    res.cookie("token", token, {
-      
-      secure: true,        // works with HTTPS
-      sameSite: "none",    // needed for cross-site
-      maxAge: 24 * 60 * 60 * 1000,
-      
-    });
+ res.setHeader("Set-Cookie", [
+  `token=${token}; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Max-Age=${24*60*60}`
+]);
+
     return res.send(user);
   } catch (err) {
     console.log(err);
@@ -82,13 +79,10 @@ export const registerUser = async (req, res) => {
     const token = generateToken(createdUser?._id, createdUser?.email);
     delete createdUser.password;
     createdUser.token = token;
-    res.cookie("token", token, {
-      
-      secure: true,        // works with HTTPS
-      sameSite: "none",    // needed for cross-site
-      maxAge: 24 * 60 * 60 * 1000,
+    res.setHeader("Set-Cookie", [
+  `token=${token}; Path=/; HttpOnly; Secure; SameSite=None; Partitioned; Max-Age=${24*60*60}`
+]);
 
-    });
 
 
     console.log("Account Created successfully!");
