@@ -34,11 +34,12 @@ export const LogInUser = async (req, res) => {
     const token = generateToken(user._id, user.email)
     user.token = token;
     res.cookie("token", token, {
-      // expiresIn: "10s",
-      maxAge: 24 * 60 * 60 * 1000, // for one day i.e 24 hrs
       httpOnly: true,
-
-    })
+      secure: true,        // works with HTTPS
+      sameSite: "none",    // needed for cross-site
+      maxAge: 24 * 60 * 60 * 1000,
+      
+    });
     return res.send(user);
   } catch (err) {
     console.log(err);
@@ -81,13 +82,12 @@ export const registerUser = async (req, res) => {
     const token = generateToken(createdUser?._id, createdUser?.email);
     delete createdUser.password;
     createdUser.token = token;
-
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,       // required for SameSite=None
-      sameSite: "none",   // cross-site cookie
+      secure: true,        // works with HTTPS
+      sameSite: "none",    // needed for cross-site
       maxAge: 24 * 60 * 60 * 1000,
-      // domain: "http://localhost:5173",
+
     });
 
 
