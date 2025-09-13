@@ -14,6 +14,7 @@ const io = new Server(server, {
       "http://localhost:5173",
       "https://gncipl-professional-networking-platform-frontend-h3ps27scl.vercel.app",
       "https://gncipl-professional-networking-platform-frontend-g5aiosxzc.vercel.app",
+      "https://gncipl-professional-networking-plat.vercel.app",
       
       "http://localhost:5173"
     ],
